@@ -7,6 +7,6 @@ const http = axios.create({
 module.exports.loadUsers = async () => {
   const {
     data: { results }
-  } = await http.get('?results=100&seed=abcde&page=1')
+  } = await http.get('?results=100&seed=fjs&page=1')
   return results
 }

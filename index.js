@@ -3,9 +3,9 @@ const { loadUsers } = require('./api/')
 
 const config = {
   user: 'postgres',
-  password: '718',
+  password: '1506',
   host: 'localhost',
-  database: 'testdb',
+  database: 'textmy',
   port: 5432
 }
 
