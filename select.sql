@@ -88,3 +88,52 @@ SELECT *
 FROM "users"
 WHERE age("birthday") > make_interval(20) AND age("birthday") < make_interval(60)
 ORDER BY "birthday"; 
+
+SELECT *
+FROM "users"
+WHERE EXTRACT ('month' FROM "birthday") = 9 AND EXTRACT ('day' FROM "birthday") = 10;
+
+SELECT "id" AS "Порядковый номер", 
+"first_name" AS "Имя", 
+"last_name" AS "Фамилия", 
+"email" AS "Электронная почта"
+FROM "users";
+
+SELECT * FROM "users" AS "u"
+WHERE "u"."id" = 99;
+
+--PAGINATION--
+
+SELECT * FROM "users"
+ORDER BY "id"
+LIMIT 15;
+
+SELECT * FROM "users"
+ORDER BY "id"
+LIMIT 15
+OFFSET 15;
+
+SELECT "id",
+"first_name"|| ' ' ||"last_name" AS "Fullname"
+FROM "users";
+
+SELECT "id",
+concat("first_name", ' ',"last_name") AS "Fullname"
+FROM "users";
+
+
+SELECT "id",
+concat("first_name", ' ',"last_name") AS "Fullname"
+FROM "users"
+WHERE char_length(concat("first_name","last_name")) > 15;
+
+SELECT "id",
+concat("first_name", ' ',"last_name") AS "Fullname"
+FROM "users"
+WHERE length(concat("first_name","last_name")) <8;
+
+SELECT * FROM
+    (SELECT "id",
+    concat("first_name", ' ',"last_name") AS "Fullname"
+    FROM "users") AS "FN"
+WHERE length("fn". "Fullname") <8;
