@@ -137,3 +137,71 @@ SELECT * FROM
     concat("first_name", ' ',"last_name") AS "Fullname"
     FROM "users") AS "FN"
 WHERE length("fn". "Fullname") <8;
+
+/* 
+avg - среднее
+max -найбольшее
+min - найменьшее
+sum - сумма
+count -количество
+ */
+
+SELECT max("height")
+FROM "users";
+
+SELECT min("height")
+FROM "users";
+--количество--
+SELECT count("height")
+FROM "users";
+--средний вес--
+SELECT avg("weight")
+FROM "users";
+
+SELECT avg("weight"), "gender"
+FROM "users"
+GROUP BY "gender";
+
+
+SELECT * FROM "users";
+
+SELECT max("weight")
+FROM "users"
+WHERE "gender" = 'female' AND EXTRACT('year' from age("birthday"))>18;
+
+SELECT max("weight"), "gender"
+FROM "users"
+WHERE EXTRACT('year' from age("birthday"))>18
+GROUP BY "gender";
+
+SELECT count(*), "gender"
+FROM "users"
+WHERE EXTRACT('year' from age("birthday"))>18
+GROUP BY "gender"
+ORDER BY count;
+
+--PRACTYISE--
+--1--
+SELECT avg(EXTRACT('year' from age("birthday")))
+FROM "users";
+--2--
+SELECT avg(EXTRACT('year' from age("birthday"))), "gender"
+FROM "users"
+GROUP BY "gender";
+--3--
+SELECT min("height"), max("height"), "gender"
+FROM "users"
+GROUP BY "gender";
+--4--
+SELECT count(*)
+FROM "users"
+WHERE EXTRACT('year' from "birthday")>1995;
+--5--
+SELECT count(*)
+FROM "users"
+WHERE "first_name" = 'Jary';
+--6--
+SELECT count(*),  EXTRACT('year' from age("birthday"))
+FROM "users"
+WHERE EXTRACT('year' from age("birthday")) BETWEEN 20 AND 30
+GROUP BY EXTRACT('year' from age("birthday"));

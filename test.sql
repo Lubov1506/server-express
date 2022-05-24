@@ -139,3 +139,196 @@ users_id int REFERENCES users(id),
 content_id int REFERENCES content(id),
 is_liked boolean
 );
+
+/* 
+CASE 
+    WHEN
+    THEN
+END */
+
+SELECT users.id, users.email, (
+    CASE
+    WHEN is_subscribe = true THEN 'subscribed'
+    ELSE 'not subscribed'
+    END
+) AS "is_subscribe"
+FROM users;
+
+/* 
+CASE expression
+    WHEN case1 THEN result1
+    WHEN case2 THEN result2
+END
+ */
+SELECT *, (
+    CASE extract('month' from "birthday")
+    WHEN 1 THEN 'winter'
+    WHEN 2 THEN 'winter'
+    WHEN 3 THEN 'spring'
+    WHEN 4 THEN 'spring'
+    WHEN 5 THEN 'spring'
+    WHEN 6 THEN 'summer'
+    WHEN 7 THEN 'summer'
+    WHEN 8 THEN 'summer'
+    WHEN 9 THEN 'autumn'
+    WHEN 10 THEN 'autumn'
+    WHEN 11 THEN 'autumn'
+    WHEN 12 THEN 'winter'
+END
+) AS "seasons"
+FROM users;
+
+---
+
+SELECT *, (
+CASE
+    WHEN extract('year' from age("birthday")) <= 30 THEN 'not adult'
+    ELSE 'adult'
+END
+) AS "age status"
+FROM users;
+
+SELECT *, (
+CASE
+    WHEN brand ILIKE 'iphone' THEN 'IPhone'
+    ELSE 'Other'
+END
+)
+AS "manufacture"
+FROM phones;
+
+SELECT *, (
+    CASE
+    WHEN price < 5000 THEN 'cheap' 
+    WHEN price > 8000 THEN 'flagman' 
+    ELSE'middle' 
+    END
+) AS "price class"
+FROM phones;
+
+SELECT *, (
+    CASE 
+    WHEN price > avg(price) THEN 'expensive'
+    ELSE 'cheap'
+    END
+) AS "avg"
+FROM phones
+GROUP BY id;
+
+SELECT *, (
+    CASE 
+    WHEN price > 
+    "avg price"
+    THEN 'expensive'
+    ELSE 'cheap'
+    END
+) AS "avg"
+FROM 
+(SELECT avg(price)AS "avg price"
+FROM phones  ) AS "avg price count";
+
+WITH "avg_price" AS (
+    SELECT avg(price) FROM phones
+)
+SELECT *, "avg_price", (
+    CASE 
+    WHEN price > "avg_price" THEN 'expensive'
+    ELSE 'cheap'
+    END
+) AS "price status"
+FROM phones;
+
+SELECT *, (
+    CASE 
+    WHEN price > (
+        SELECT avg(price) FROM phones
+    ) THEN 'expensive'
+    ELSE 'cheap'
+    END
+) AS "price status"
+FROM phones;
+
+
+SELECT *, (
+    CASE 
+    WHEN 
+    (SELECT sum(o.id) FROM orders GROUP BY o.user_id) > 3 THEN 'постоянный покупатель'
+    WHEN 
+    (SELECT sum(o.id) FROM orders GROUP BY o.user_id)> 2 THEN 'активный покупатель'
+    ELSE 'покупатель'
+    END
+) AS "buying active"
+FROM users AS u
+JOIN orders AS o
+ON u.id = o.user_id
+GROUP BY o.user_id;
+
+SELECT u.id, u.email, (
+    CASE 
+    WHEN count(o.id) > 3 THEN 'постоянный покупатель'
+    WHEN count(o.id) > 2 THEN 'активный покупатель'
+    ELSE 'покупатель'
+    END
+) AS "buying active"
+FROM users AS u
+LEFT JOIN orders AS o
+ON u.id = o.user_id
+GROUP BY o.user_id, u.id
+ORDER BY u.id;
+-- COALESCE - вернет первый не NULLI
+SELECT COALESCE (NULL, 12,24);
+SELECT COALESCE (NULL, NULL,NULL);
+
+ALTER TABLE phones
+ADD COLUMN "decsr" text;
+
+SELECT model, price, COALESCE(decsr, 'not available') AS "description"
+FROM phones;
+
+/* 
+NULLIF (12, 12) - NULL;
+NULLIF (12, NULL) - 12;
+NULLIF (15, 24) - 15;
+NULLIF (NULL, NULL) - NULL;
+ */
+
+ /* GREATEST, LEAST
+ GREATEST (1,2,3,4,5,6) - 6
+ LEAST (1,2,3,4,5,6) - 1 */
+
+
+/*  ________ выражения ПОДЗАПРОСОВ ________    */
+
+/* 
+IN - NOT IN
+SOME, ANY
+EXCISTS */
+
+--Выбрать всех пользователей, которые не делали заказы
+SELECT * 
+FROM users AS u
+WHERE u.id NOT IN (SELECT user_id FROM orders);
+
+SELECT *
+FROM phones AS p
+WHERE p.id NOT IN (
+    SELECT phone_id FROM orders_to_phones
+);
+
+SELECT EXISTS(
+    SELECT * FROM users
+    WHERE users.id= 20
+);
+
+--Делал ли пользователь заказ
+SELECT * FROM users AS u
+WHERE EXISTS(
+    SELECT * FROM orders
+    WHERE u.id=orders.user_id
+);
+
+--ALL - true, если условие истина для всех, false - наоборот
+SELECT *
+FROM phones AS p
+WHERE p.id != ALL (SELECT "phone_id"
+FROM orders_to_phones);
