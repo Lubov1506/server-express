@@ -330,5 +330,77 @@ WHERE EXISTS(
 --ALL - true, если условие истина для всех, false - наоборот
 SELECT *
 FROM phones AS p
-WHERE p.id != ALL (SELECT "phone_id"
-FROM orders_to_phones);
+WHERE p.id != ALL (
+    SELECT "phone_id"
+    FROM orders_to_phones
+    );
+
+-- VIEWS - виртуальные таблицы
+
+SELECT u.*, count(o.id) AS "order amount" 
+FROM users AS u
+JOIN orders AS o
+ON u.id=o.user_id
+GROUP BY u.id;
+
+
+CREATE OR REPLACE VIEW "users_with_order_amount" AS(
+    SELECT u.*, count(o.id) AS "order amount" 
+    FROM users AS u
+    LEFT JOIN orders AS o
+    ON u.id=o.user_id
+    GROUP BY u.id
+);
+SELECT * FROM users_with_order_amount;
+
+-- Заказы с их стоимостью
+
+SELECT o.* , sum(p.price*otp.quantity) AS "Стоимость заказа"
+FROM orders AS o
+JOIN orders_to_phones AS otp
+ON o.id=otp.order_id
+JOIN phones AS p
+ON p.id=otp.phone_id
+GROUP BY o.id;
+
+DROP VIEW "orders_with_price" ;
+CREATE VIEW "orders_with_price" AS (
+    SELECT o.* , sum(p.price*otp.quantity) AS "Стоимость заказа"
+    FROM orders AS o
+    JOIN orders_to_phones AS otp
+    ON o.id=otp.order_id
+    JOIN phones AS p
+    ON p.id=otp.phone_id
+    GROUP BY o.id
+);
+
+SELECT u.id, u.email, u.birthday, owp."Стоимость заказа"
+FROM "orders_with_price" AS owp
+JOIN users AS u
+ON u.id=owp.user_id;
+
+CREATE VIEW "spam_list" AS (
+    SELECT u.id, u.email, u.birthday, owp."Стоимость заказа"
+    FROM "orders_with_price" AS owp
+    JOIN users AS u
+    ON u.id=owp.user_id
+);
+
+CREATE VIEW "users_with_FN_age_gender" AS (
+    SELECT concat(first_name, ' ', last_name) AS "Fullname", EXTRACT('year' from age("birthday") ) AS "Age", gender AS "Gender"
+    FROM users
+);
+
+CREATE VIEW "top10_expensive_buying" AS (
+   SELECT *
+    FROM orders_with_price
+    ORDER BY "Стоимость заказа" desc
+    LIMIT 10 
+);
+CREATE VIEW "top10_users_most_buyings" AS (
+SELECT concat(u.first_name, ' ', u.last_name)
+FROM users AS u
+JOIN users_with_order_amount AS uwoa
+ON u.id=uwoa.id
+ORDER BY "order amount" desc, u.birthday
+LIMIT 10);
